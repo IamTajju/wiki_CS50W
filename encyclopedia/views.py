@@ -23,7 +23,7 @@ def entry(request, title):
             "title": title
         })
     
-    raise Http404
+    return render(request, "encyclopedia/404.html")
 
 
 def search(request):
