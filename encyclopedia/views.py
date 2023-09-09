@@ -36,10 +36,7 @@ def search(request):
 
     pageContent = util.get_entry(title)
     if pageContent:
-        return render(request, "encyclopedia/entry.html", {
-            "title": title,
-            "pageContent": pageContent
-        })
+        return entry(request, title)
     
     results = [availableTitle for availableTitle in util.list_entries() if title in availableTitle]
 
