@@ -14,37 +14,39 @@ def index(request):
 
 def entry(request, title):
     pageContent = util.get_entry(title)
-    markdowner = Markdown()
-    pageContent = markdowner.convert(pageContent)
-    if not pageContent:
-        raise Http404
+    if pageContent:
+        markdowner = Markdown()
+        pageContent = markdowner.convert(pageContent)
 
-    return render(request, "encyclopedia/entry.html", {
-        "pageContent": pageContent,
-        "title": title
-    })
+        return render(request, "encyclopedia/entry.html", {
+            "pageContent": pageContent,
+            "title": title
+        })
+    
+    raise Http404
 
 
 def search(request):
-    try:
-        title = request.GET['title']
-    except:
+    title = request.GET.get('title', '')
+
+    if not title:
         return render(request, "encyclopedia/search.html", {
             "message": "Please enter a title query in the search box"
         })
 
-    if(util.get_entry(title) == None):
-        results = []
-        entries = util.list_entries()
-        for stored_title in entries:
-            if title in stored_title:
-                results.append(stored_title)
-
-        return render(request, "encyclopedia/search.html", {
-            "results": results
+    pageContent = util.get_entry(title)
+    if pageContent:
+        return render(request, "encyclopedia/entry.html", {
+            "title": title,
+            "pageContent": pageContent
         })
+    
+    results = [availableTitle for availableTitle in util.list_entries() if title in availableTitle]
 
-    return entry(request, title)
+    return render(request, "encyclopedia/search.html", {
+        "results": results
+    })
+
 
 
 def createPage(request):
@@ -55,7 +57,7 @@ def createPage(request):
         title = request.POST['title']
         markdownContent = request.POST['markdownContent']
 
-        if (util.get_entry(title) != None):
+        if util.get_entry(title):
             message = "An entry with this title already exists!"
 
         else:
